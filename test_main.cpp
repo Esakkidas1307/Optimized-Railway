@@ -11,6 +11,19 @@ int railway_app_main(void);
 
 extern int loggedInPassengerId;
 
+#include <setjmp.h>
+#include "optimization_runtime.h"
+
+
+int saveTrainData(void);
+int saveTrainScheduleData(void);
+int savePassengerData(void);
+int saveAvailabilityData(void);
+int saveUserData(void);
+int saveBookingData(void);
+
+void railway_set_navigation_target(jmp_buf *target);
+
 void initializeSystem(void);
 void cleanupSystem(void);
 void initializeTrainModule(void);
@@ -320,3 +333,26 @@ TEST_F(MainTest, MultipleChoicesAreHandledInSequence)
     EXPECT_EQ(pnrCalls, 1);
     EXPECT_EQ(cleanupCalls, 1);
 }
+
+TEST_F(MainTest, ThreeInvalidChoicesContinueToNextChoice)
+{
+    choices = {99, 99, 99, 4, 0};
+
+    EXPECT_EQ(railway_app_main(), 0);
+
+    EXPECT_EQ(pnrCalls, 1);
+    EXPECT_EQ(cleanupCalls, 1);
+    EXPECT_EQ(registerCalls, 0);
+    EXPECT_EQ(loginCalls, 0);
+}
+
+TEST_F(MainTest, ValidChoiceResetsInvalidChoiceCounter)
+{
+    choices = {99, 4, 99, 4, 0};
+
+    EXPECT_EQ(railway_app_main(), 0);
+
+    EXPECT_EQ(pnrCalls, 2);
+    EXPECT_EQ(cleanupCalls, 1);
+}
+

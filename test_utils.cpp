@@ -303,25 +303,6 @@ TEST(JourneyDateTest, AcceptsEarliestSupportedYear)
 }
 
 
-TEST(UtilsNavigationTest, RepeatedPromptReturnsToActiveMenu)
-{
-    jmp_buf env;
-    railway_set_navigation_target(&env);
-
-    if (setjmp(env) == 0) {
-        char buffer[32] = {};
-
-        // Empty input is retried by getStringInput.
-        // Four calls with the same prompt trigger navigation.
-        StdinRedirect input("\n\n\n\n");
-
-        getStringInput("Repeated test prompt: ", buffer, sizeof(buffer));
-
-        FAIL() << "Expected navigation after repeated prompts";
-    }
-
-    railway_set_navigation_target(nullptr);
-}
 
 TEST(UtilsNavigationTest, RepeatedPromptReturnsToActiveMenu)
 {

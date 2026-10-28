@@ -159,6 +159,37 @@ target_include_directories(railway_test_core
         "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+
+# --------------------------------------------------
+# Train module tests
+# --------------------------------------------------
+add_executable(train_tests
+    test_train.cpp
+)
+
+target_include_directories(train_tests PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(train_tests PRIVATE
+    railway_test_core
+    GTest::gtest_main
+)
+
+set_target_properties(train_tests PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(train_tests PRIVATE --coverage -O0 -g)
+    target_link_options(train_tests PRIVATE --coverage)
+endif()
+
+gtest_discover_tests(train_tests)
+
+
+
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(railway_test_core
         PRIVATE

@@ -702,3 +702,159 @@ TEST_F(TrainScheduleTest, DateTimeHelperRejectsInvalidDate) {
     EXPECT_FALSE(isValidJourneyDate("abc"));
     EXPECT_FALSE(isValidJourneyDate("1:1:2026"));
 }
+
+
+TEST_F(TrainScheduleTest, FindScheduleRejectsNullDate)
+{
+    EXPECT_EQ(findTrainScheduleByDate(12627, nullptr), nullptr);
+}
+
+TEST_F(TrainScheduleTest, FindScheduleReturnsMatchingRecord)
+{
+    TrainSchedule *expected =
+        makeSchedule(12627, "26:11:2026", TRAIN_RUNNING, 0);
+
+    ASSERT_NE(expected, nullptr);
+
+    // Saving rebuilds the schedule index.
+    ASSERT_EQ(saveTrainScheduleData(), SUCCESS);
+
+    EXPECT_EQ(
+        findTrainScheduleByDate(12627, "26:11:2026"),
+        expected);
+}
+
+TEST_F(TrainScheduleTest, FindScheduleReturnsNullWhenNotFound)
+{
+    ASSERT_NE(
+        makeSchedule(12627, "26:11:2026", TRAIN_RUNNING, 0),
+        nullptr);
+
+    ASSERT_EQ(saveTrainScheduleData(), SUCCESS);
+
+    EXPECT_EQ(
+        findTrainScheduleByDate(99999, "26:11:2026"),
+        nullptr);
+
+    EXPECT_EQ(
+        findTrainScheduleByDate(12627, "27:11:2026"),
+        nullptr);
+}
+
+
+
+TEST_F(TrainScheduleTest, LoadSkipsRecordWithIncorrectEndMarker)
+{
+    {
+        std::ofstream file("trainschedule.txt");
+        file << "SCHEDULE_START\n"
+             << "12627\n"
+             << "26:11:2026\n"
+             << TRAIN_RUNNING << "\n"
+             << "0\n"
+             << "INVALID_END\n";
+    }
+
+    loadTrainScheduleData();
+
+    EXPECT_EQ(scheduleHead, nullptr);
+}
+
+TEST_F(TrainScheduleTest, LoadHandlesTruncatedRecord)
+{
+    {
+        std::ofstream file("trainschedule.txt");
+        file << "SCHEDULE_START\n"
+             << "12627\n"
+             << "26:11:2026\n";
+    }
+
+    loadTrainScheduleData();
+
+    EXPECT_EQ(scheduleHead, nullptr);
+}
+
+TEST_F(TrainScheduleTest, LoadSkipsNonNumericTrainNumber)
+{
+    {
+        std::ofstream file("trainschedule.txt");
+        file << "SCHEDULE_START\n"
+             << "not-a-number\n"
+             << "26:11:2026\n"
+             << TRAIN_RUNNING << "\n"
+             << "0\n"
+             << "SCHEDULE_END\n";
+    }
+
+    loadTrainScheduleData();
+
+    EXPECT_EQ(scheduleHead, nullptr);
+}
+
+
+TEST_F(TrainScheduleTest, FindScheduleUsesLinkedListBeforeIndexBuild)
+{
+    TrainSchedule *expected =
+        makeSchedule(12627, "26:11:2026", TRAIN_RUNNING, 0);
+    ASSERT_NE(expected, nullptr);
+
+    // Do not call saveTrainScheduleData() here:
+    // lookup should use the linked-list fallback.
+    EXPECT_EQ(
+        findTrainScheduleByDate(12627, "26:11:2026"),
+        expected);
+
+    EXPECT_EQ(
+        findTrainScheduleByDate(99999, "26:11:2026"),
+        nullptr);
+}
+
+TEST_F(TrainScheduleTest, SearchTraversesIndexedSchedules)
+{
+    ASSERT_NE(
+        makeSchedule(12628, "27:11:2026", TRAIN_RUNNING, 0),
+        nullptr);
+    ASSERT_NE(
+        makeSchedule(12627, "26:11:2026", TRAIN_RUNNING, 0),
+        nullptr);
+
+    ASSERT_EQ(saveTrainScheduleData(), SUCCESS);
+
+    const std::string output = runWithInput(
+        searchTrainSchedule,
+        "12628\n27:11:2026\n");
+
+    EXPECT_NE(
+        output.find("Train Number : 12628"),
+        std::string::npos);
+}
+
+TEST_F(TrainScheduleTest, LoadRecoversAtNextRecordStartMarker)
+{
+    {
+        std::ofstream file("trainschedule.txt");
+        file << "SCHEDULE_START\n"
+             << "12627\n"
+             << "26:11:2026\n"
+             << TRAIN_RUNNING << "\n"
+             << "0\n"
+             // The end marker is missing, so the next start marker
+             // is encountered while parsing the first record.
+             << "SCHEDULE_START\n"
+             << "12628\n"
+             << "27:11:2026\n"
+             << TRAIN_RUNNING << "\n"
+             << "0\n"
+             << "SCHEDULE_END\n";
+    }
+
+    loadTrainScheduleData();
+
+    ASSERT_NE(scheduleHead, nullptr);
+    EXPECT_EQ(scheduleHead->trainNumber, 12628);
+    EXPECT_STREQ(scheduleHead->journeyDate, "27:11:2026");
+}
+
+
+
+
