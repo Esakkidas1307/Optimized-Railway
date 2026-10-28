@@ -856,3 +856,216 @@ TEST_F(AvailabilityTest, LoadAvailabilityDataLinksMultipleRecords) {
     EXPECT_EQ(availabilityHead->next->trainNumber, 12345);
     EXPECT_EQ(availabilityHead->trainNumber, 12345);
 }
+
+
+TEST_F(AvailabilityTest, CheckAvailabilityShowsMultipleInventoryRecords)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    addTestAvailability(7, 4, 0, "25:10:2026", 12345);
+
+    // Add a second class record for the same train and date.
+    auto* second = static_cast<Availability*>(
+        std::calloc(1, sizeof(Availability)));
+    ASSERT_NE(second, nullptr);
+
+    second->trainNumber = 12345;
+    std::strcpy(second->journeyDate, "25:10:2026");
+    std::strcpy(second->className, "2A");
+    second->availableSeats = 5;
+    second->availableRAC = 2;
+    second->availableWL = 0;
+
+    second->next = availabilityHead;
+    if (availabilityHead != nullptr)
+        availabilityHead->prev = second;
+    availabilityHead = second;
+
+    const std::string output =
+        runCheckAvailability("12345\n25:10:2026\n");
+
+    EXPECT_NE(output.find("Available: 7"), std::string::npos);
+    EXPECT_NE(output.find("Available: 5"), std::string::npos);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsNegativeSeats)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "12345\n"
+         << "25:10:2026\n"
+         << "SL\n"
+         << "-1\n"
+         << "3\n"
+         << "1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(12345, "25:10:2026", "SL"), nullptr);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsNegativeRAC)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "12345\n"
+         << "25:10:2026\n"
+         << "SL\n"
+         << "8\n"
+         << "-1\n"
+         << "1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(12345, "25:10:2026", "SL"), nullptr);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsNegativeWaitingList)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "12345\n"
+         << "25:10:2026\n"
+         << "SL\n"
+         << "8\n"
+         << "3\n"
+         << "-1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(12345, "25:10:2026", "SL"), nullptr);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsInvalidSeatValue)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "12345\n"
+         << "25:10:2026\n"
+         << "SL\n"
+         << "invalid\n"
+         << "3\n"
+         << "1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(12345, "25:10:2026", "SL"), nullptr);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsUnknownTrain)
+{
+    addTestTrain();
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "99999\n"
+         << "25:10:2026\n"
+         << "SL\n"
+         << "8\n"
+         << "3\n"
+         << "1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(99999, "25:10:2026", "SL"), nullptr);
+}
+
+TEST_F(AvailabilityTest, LoadAvailabilityDataRejectsUnknownClass)
+{
+    Train* train = addTestTrain();
+    ASSERT_NE(train, nullptr);
+    addTestSchedule();
+
+    std::ofstream file("running.txt");
+    ASSERT_TRUE(file.is_open());
+
+    file << "AVAILABILITY_START\n"
+         << "12345\n"
+         << "25:10:2026\n"
+         << "2A\n"
+         << "8\n"
+         << "3\n"
+         << "1\n"
+         << "AVAILABILITY_END\n";
+    file.close();
+
+    // The train has only the SL coach.
+    loadAvailabilityData();
+
+    EXPECT_EQ(findAvailability(12345, "25:10:2026", "2A"), nullptr);
+}
+
+TEST_F(AvailabilityTest, CreateAvailabilityRecordPreservesExistingCounts)
+{
+    Train* train = addTestTrain();
+    ASSERT_NE(train, nullptr);
+
+    createAvailabilityRecord(train, "25:10:2026");
+
+    Availability* record =
+        findAvailability(12345, "25:10:2026", "SL");
+    ASSERT_NE(record, nullptr);
+
+    record->availableSeats = 2;
+    record->availableRAC = 1;
+    record->availableWL = 3;
+
+    createAvailabilityRecord(train, "25:10:2026");
+
+    EXPECT_EQ(record->availableSeats, 2);
+    EXPECT_EQ(record->availableRAC, 1);
+    EXPECT_EQ(record->availableWL, 3);
+}
+
+
+TEST_F(AvailabilityTest, InitializeAvailabilityModuleHandlesOpenFailure)
+{
+    ASSERT_TRUE(fs::create_directory("running.txt"));
+
+    EXPECT_NO_THROW(initializeAvailabilityModule());
+}
+
+
+TEST_F(AvailabilityTest, SaveAvailabilityDataHandlesFlushFailure)
+{
+    addTestAvailability(5, 2, 0);
+
+    fs::create_symlink("/dev/full", "running.txt.tmp");
+    ASSERT_TRUE(fs::is_symlink("running.txt.tmp"));
+    EXPECT_EQ(saveAvailabilityData(), FAILURE);
+}
+

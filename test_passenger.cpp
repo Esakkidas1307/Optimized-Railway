@@ -854,18 +854,19 @@ TEST_F(PassengerTest, CreatingPassengerUpdatesPreviousHeadLink)
 
 TEST_F(PassengerTest, SavePassengerDataHandlesFileOpenFailure)
 {
-    ASSERT_EQ(mkdir("passengers.txt", 0700), 0);
+    ASSERT_EQ(mkdir("passengers.txt.tmp", 0700), 0);
 
     testing::internal::CaptureStdout();
-    savePassengerData();
+    int result = savePassengerData();
     std::string output = testing::internal::GetCapturedStdout();
 
+    EXPECT_EQ(result, FAILURE);
     EXPECT_NE(
         output.find("Unable To Save Passenger Data"),
         std::string::npos
     );
 
-    EXPECT_EQ(rmdir("passengers.txt"), 0);
+    EXPECT_EQ(rmdir("passengers.txt.tmp"), 0);
 }
 
 // --------------------------------------------------

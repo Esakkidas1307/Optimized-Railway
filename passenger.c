@@ -376,9 +376,13 @@ int savePassengerData(void)
     railway_runtime_mark_dirty(RAILWAY_DATA_PASSENGERS);
     if (rebuildPassengerIndex() != SUCCESS) return FAILURE;
     fp = fopen(PASSENGER_TEMP_FILE, "w");
-    if (fp == NULL) return FAILURE;
+if (fp == NULL)
+{
+    printf("Unable To Save Passenger Data\n");
+    return FAILURE;
+}
     for (position = 0U; position < passengerIndex.count; ++position) {
-        Passenger *current = (Passenger *)passengerIndex.items[position];
+        const Passenger *current = (const Passenger *)passengerIndex.items[position];
         if (fprintf(fp, "PASSENGER_START\n%d\n%s\n%d\n%s\n%s\nPASSENGER_END\n",
                     current->passengerId, current->passengerName, current->age,
                     current->gender, current->phoneNumber) < 0) {
@@ -772,7 +776,7 @@ void deletePassenger(void)
                 }
             }
 
-            free(current);
+           free(current);
 
             savePassengerData();
 

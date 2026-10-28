@@ -16,14 +16,14 @@ find_package(Threads REQUIRED)
 enable_testing()
 
 add_executable(optimization_index_tests
-    tests/optimization_index_test.c optimization_support.c
+    optimization_index_test.c optimization_support.c
 )
 target_include_directories(optimization_index_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(optimization_index_tests PRIVATE Threads::Threads)
 add_test(NAME optimization_index_tests COMMAND optimization_index_tests)
 
 add_executable(optimization_benchmark
-    tests/optimization_benchmark.c optimization_support.c
+    optimization_benchmark.c optimization_support.c
 )
 target_include_directories(optimization_benchmark PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(optimization_benchmark PRIVATE Threads::Threads)
@@ -62,8 +62,8 @@ include(GoogleTest)
 add_executable(admin_auth_tests
     admin_auth.c
     date_time.c
-    tests/admin_auth_test_support.c
-    tests/test_admin_auth.cpp
+    admin_auth_test_support.c
+    test_admin_auth.cpp
 )
 
 target_include_directories(admin_auth_tests PRIVATE
@@ -96,8 +96,8 @@ gtest_discover_tests(admin_auth_tests)
 # --------------------------------------------------
 add_executable(adminmenu_tests
     adminmenu.c
-    tests/test_adminmenu.cpp
-    tests/adminmenu_test_support.c
+    test_adminmenu.cpp
+    adminmenu_test_support.c
 )
 
 target_include_directories(adminmenu_tests PRIVATE
@@ -174,8 +174,8 @@ endif()
 add_executable(usermenu_tests
     usermenu.c
     date_time.c
-    tests/usermenu_test_support.c
-    tests/test_usermenu.cpp
+    usermenu_test_support.c
+    test_usermenu.cpp
 )
 
 target_include_directories(usermenu_tests PRIVATE
@@ -224,8 +224,8 @@ target_include_directories(main_test_entry PRIVATE
 
 add_executable(main_tests
     $<TARGET_OBJECTS:main_test_entry>
-    tests/test_main.cpp
-    tests/main_test_support.c
+    test_main.cpp
+    main_test_support.c
 )
 
 target_include_directories(main_tests PRIVATE
@@ -270,7 +270,7 @@ target_include_directories(passenger_test_module PRIVATE
 )
 
 add_executable(passenger_tests
-    tests/test_passenger.cpp
+    test_passenger.cpp
     $<TARGET_OBJECTS:passenger_test_module>
 )
 
@@ -305,8 +305,8 @@ target_include_directories(
 )
 
 add_executable(pnr_status_tests
-    tests/test_pnr_status.cpp
-    tests/pnr_status_test_support.c
+    test_pnr_status.cpp
+    pnr_status_test_support.c
     $<TARGET_OBJECTS:pnr_status_test_module>
 )
 
@@ -346,7 +346,7 @@ target_include_directories(
 )
 
 add_executable(reallocation_tests
-    tests/test_reallocation.cpp
+    test_reallocation.cpp
     $<TARGET_OBJECTS:reallocation_test_module>
 )
 
@@ -385,7 +385,7 @@ target_compile_options(reserved_booking_test_module
 )
 
 add_executable(reserved_booking_tests
-    tests/test_reserved_booking.cpp
+    test_reserved_booking.cpp
     reserved_booking.c
     passenger.c
 )
@@ -414,14 +414,14 @@ gtest_discover_tests(reserved_booking_tests)
 # --------------------------------------------------
 # Tests: utils, refund, availability
 # IMPORTANT:
-# Do not add tests/test_cancellation.cpp here.
+# Do not add test_cancellation.cpp here.
 # It contains mocks that conflict with real functions
 # in railway_test_core.
 # --------------------------------------------------
 add_executable(railway_tests
-    tests/test_utils.cpp
-    tests/test_refund.cpp
-    tests/test_availability.cpp
+    test_utils.cpp
+    test_refund.cpp
+    test_availability.cpp
 )
 
 target_include_directories(railway_tests
@@ -455,7 +455,7 @@ gtest_discover_tests(railway_tests)
 # --------------------------------------------------
 add_executable(cancellation_tests
     cancellation.c
-    tests/test_cancellation.cpp
+    test_cancellation.cpp
 )
 
 target_include_directories(cancellation_tests
@@ -496,7 +496,7 @@ gtest_discover_tests(cancellation_tests)
 
 # Train Schedule GoogleTest target
 add_executable(trainschedule_tests
-    tests/test_trainschedule.cpp
+    test_trainschedule.cpp
 )
 
 target_link_libraries(trainschedule_tests

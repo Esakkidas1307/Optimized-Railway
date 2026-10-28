@@ -14,6 +14,8 @@ void initializeSystem(void);
 
 void cleanupSystem(void);
 
+void clearInputBuffer(void);
+
 
 int getIntegerInput(const char *message);
 

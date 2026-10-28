@@ -396,7 +396,7 @@ int saveTrainData(void)
     }
     for (sorted_position = 0U; sorted_position < trainIndex.count; ++sorted_position)
     {
-        Train *current = (Train *)trainIndex.items[sorted_position];
+        const Train *current = (const Train *)trainIndex.items[sorted_position];
         fprintf(fp,"TRAIN_START\n");
         fprintf(fp,"%d\n",
                 current->trainNumber);

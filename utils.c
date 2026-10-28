@@ -187,3 +187,11 @@ int isValidJourneyDate(const char *date)
     if (mm == 2 && ((yyyy % 400 == 0) || (yyyy % 4 == 0 && yyyy % 100 != 0))) maxDay = 29;
     return dd >= 1 && dd <= maxDay ? SUCCESS : FAILURE;
 }
+
+void clearInputBuffer(void)
+{
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF)
+    {
+    }
+}

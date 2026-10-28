@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include <iterator>
 #include <unistd.h>
 
 #include "reserved_booking.h"
@@ -747,3 +748,97 @@ TEST_F(ReservedBookingTest, RejectsUnsupportedClassDuringLoad) {
     EXPECT_EQ(bookingHead, nullptr);
 }
 
+TEST_F(ReservedBookingTest, SaveFailsWhenTemporaryPathIsDirectory)
+{
+    // Remove a stale temporary file if one exists.
+    std::remove("bookings.txt.tmp");
+
+    // Create a directory at the temporary-file path.
+    ASSERT_EQ(std::system("mkdir bookings.txt.tmp"), 0);
+
+    EXPECT_EQ(saveBookingData(), FAILURE);
+
+    ASSERT_EQ(std::system("rmdir bookings.txt.tmp"), 0);
+}
+
+TEST(BookingFlow, ThreeInvalidJourneyDatesReturnWithoutBooking)
+{
+    addBookingTestData(5, 2, 0, 5);
+
+    BookingInput input(
+        "Chennai\nBengaluru\n"
+        "01:01:2000\n"
+        "01:01:2000\n"
+        "01:01:2000\n"
+    );
+
+    bookTicket(101);
+
+    EXPECT_EQ(bookingHead, nullptr);
+    EXPECT_EQ(availabilityHead->availableSeats, 5);
+}
+
+TEST(BookingFlow, ThreeInvalidTrainSelectionsReturnWithoutBooking)
+{
+    addBookingTestData(5, 2, 0, 5);
+
+    BookingInput input(
+        "Chennai\nBengaluru\n25:12:2026\n"
+        "99999\n99999\n99999\n"
+    );
+
+    bookTicket(101);
+
+    EXPECT_EQ(bookingHead, nullptr);
+    EXPECT_EQ(availabilityHead->availableSeats, 5);
+}
+
+TEST_F(ReservedBookingTest, LoadUnreservedBookingClearsPNR)
+{
+    Booking* b = makeBooking("OLDPNR123");
+    ASSERT_NE(b, nullptr);
+
+    std::snprintf(
+        b->bookingType,
+        sizeof(b->bookingType),
+        "UNRESERVED"
+    );
+    std::snprintf(
+        b->className,
+        sizeof(b->className),
+        "UNRES"
+    );
+    std::snprintf(
+        b->journeyDate,
+        sizeof(b->journeyDate),
+        "N/A"
+    );
+
+    b->adults = 2;
+    b->children = 1;
+    b->fare = 700.0f;
+
+    addBooking(b);
+    ASSERT_EQ(saveBookingData(), SUCCESS);
+
+    clearBookings();
+    loadBookingData();
+
+    ASSERT_NE(bookingHead, nullptr);
+    EXPECT_STREQ(bookingHead->bookingType, "UNRESERVED");
+    EXPECT_STREQ(bookingHead->pnrNumber, "");
+    EXPECT_EQ(bookingHead->adults, 2);
+    EXPECT_EQ(bookingHead->children, 1);
+}
+
+TEST_F(ReservedBookingTest, SaveFailsWhenBookingFileIsDirectory)
+{
+    std::remove("bookings.txt");
+    std::remove("bookings.txt.tmp");
+
+    ASSERT_EQ(std::system("mkdir bookings.txt"), 0);
+
+    EXPECT_EQ(saveBookingData(), FAILURE);
+
+    ASSERT_EQ(std::system("rmdir bookings.txt"), 0);
+}

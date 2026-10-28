@@ -348,3 +348,55 @@ TEST_F(AdminMenuTest, MultipleChoicesAreHandledInSequence)
     EXPECT_EQ(updateScheduleCalls, 0);
     EXPECT_EQ(deleteScheduleCalls, 0);
 }
+
+TEST_F(AdminMenuTest, ThreeInvalidChoicesReturnToMainMenu)
+{
+    menuChoices = {99, -1, 0};
+
+    EXPECT_NO_THROW(adminMenu());
+
+    EXPECT_EQ(choiceIndex, 3U);
+    EXPECT_EQ(addTrainCalls, 0);
+    EXPECT_EQ(availabilityCalls, 0);
+}
+
+TEST_F(AdminMenuTest, ValidChoiceResetsInvalidChoiceCounter)
+{
+    menuChoices = {99, 1, 99, 15};
+
+    EXPECT_NO_THROW(adminMenu());
+
+    EXPECT_EQ(choiceIndex, 4U);
+    EXPECT_EQ(addTrainCalls, 1);
+}
+
+TEST_F(AdminMenuTest, ExecutesRemainingMenuOptions)
+{
+    menuChoices = {2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 15};
+
+    EXPECT_NO_THROW(adminMenu());
+
+    EXPECT_EQ(viewTrainCalls, 1);
+    EXPECT_EQ(searchTrainCalls, 1);
+    EXPECT_EQ(updateTrainCalls, 1);
+    EXPECT_EQ(deleteTrainCalls, 1);
+
+    EXPECT_EQ(searchPassengerCalls, 1);
+    EXPECT_EQ(deletePassengerCalls, 1);
+
+    EXPECT_EQ(viewSchedulesCalls, 1);
+    EXPECT_EQ(searchScheduleCalls, 1);
+    EXPECT_EQ(updateScheduleCalls, 1);
+    EXPECT_EQ(deleteScheduleCalls, 1);
+}
+
+TEST_F(AdminMenuTest, ValidChoiceBetweenInvalidChoicesPreventsEarlyLogout)
+{
+    menuChoices = {100, 1, 101, 2, 102, 15};
+
+    EXPECT_NO_THROW(adminMenu());
+
+    EXPECT_EQ(addTrainCalls, 1);
+    EXPECT_EQ(viewTrainCalls, 1);
+    EXPECT_EQ(choiceIndex, 6U);
+}

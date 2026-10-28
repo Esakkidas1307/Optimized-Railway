@@ -5,6 +5,9 @@ extern "C" {
 #include <gtest/gtest.h>
 #include <cstdio>
 #include <cstring>
+#include <climits>
+#include <csetjmp>
+#include <cerrno>
 #include <string>
 #include <unistd.h>
 #include <stdio_ext.h>
@@ -178,3 +181,204 @@ TEST(SystemLifecycleTest, InitializesAndCleansUp) {
     EXPECT_NO_THROW(initializeSystem());
     EXPECT_NO_THROW(cleanupSystem());
 }
+
+
+TEST(IntegerInputTest, AcceptsIntegerBoundaries)
+{
+    {
+        StdinRedirect input("2147483647\n");
+        EXPECT_EQ(INT_MAX, getIntegerInput("Number: "));
+    }
+
+    {
+        StdinRedirect input("-2147483648\n");
+        EXPECT_EQ(INT_MIN, getIntegerInput("Number: "));
+    }
+}
+
+TEST(IntegerInputTest, RejectsIntegerOverflow)
+{
+    StdinRedirect input("999999999999999999999999\n42\n");
+
+    EXPECT_EQ(42, getIntegerInput("Number: "));
+}
+
+TEST(IntegerInputTest, RejectsTrailingCharacters)
+{
+    StdinRedirect input("12abc\n42\n");
+
+    EXPECT_EQ(42, getIntegerInput("Number: "));
+}
+
+TEST(IntegerInputTest, ReturnsZeroAfterThreeInvalidInputs)
+{
+    StdinRedirect input("abc\n\n12abc\n");
+
+    EXPECT_EQ(0, getIntegerInput("Number: "));
+}
+
+TEST(StringInputTest, RejectsNullBuffer)
+{
+    EXPECT_NO_THROW(getStringInput("Name: ", nullptr, 10));
+}
+
+TEST(StringInputTest, RejectsNonPositiveBufferSize)
+{
+    char buffer[10] = "original";
+
+    getStringInput("Name: ", buffer, 0);
+    EXPECT_STREQ("original", buffer);
+
+    getStringInput("Name: ", buffer, -1);
+    EXPECT_STREQ("original", buffer);
+}
+
+TEST(StringInputTest, ReturnsEmptyAfterThreeInvalidInputs)
+{
+    StdinRedirect input("\n   \n\t\n");
+    char buffer[32] = "initial";
+
+    getStringInput("Name: ", buffer, sizeof(buffer));
+
+    EXPECT_STREQ("", buffer);
+}
+
+TEST(StringInputTest, AcceptsInputWithCarriageReturn)
+{
+    StdinRedirect input("  Chennai\r\n");
+    char buffer[32] = {};
+
+    getStringInput("Name: ", buffer, sizeof(buffer));
+
+    EXPECT_STREQ("Chennai", buffer);
+}
+
+TEST(FloatInputTest, RejectsNonFiniteValues)
+{
+    StdinRedirect input("nan\n42.5\n");
+
+    EXPECT_FLOAT_EQ(42.5f, getFloatInput("Amount: "));
+}
+
+TEST(FloatInputTest, RejectsValuesOutsideAllowedRange)
+{
+    StdinRedirect input("1000000001\n42.5\n");
+
+    EXPECT_FLOAT_EQ(42.5f, getFloatInput("Amount: "));
+}
+
+TEST(FloatInputTest, RejectsTrailingCharacters)
+{
+    StdinRedirect input("12.5abc\n8.5\n");
+
+    EXPECT_FLOAT_EQ(8.5f, getFloatInput("Amount: "));
+}
+
+TEST(FloatInputTest, ReturnsNegativeOneAfterThreeInvalidInputs)
+{
+    StdinRedirect input("abc\nnan\n\n");
+
+    EXPECT_FLOAT_EQ(-1.0f, getFloatInput("Amount: "));
+}
+
+TEST(JourneyDateTest, ValidatesLeapYearRules)
+{
+    EXPECT_EQ(1, isValidJourneyDate("29:02:2000"));
+    EXPECT_EQ(0, isValidJourneyDate("29:02:1900"));
+    EXPECT_EQ(1, isValidJourneyDate("29:02:2024"));
+    EXPECT_EQ(0, isValidJourneyDate("29:02:2025"));
+}
+
+TEST(JourneyDateTest, RejectsInvalidDayAndMonthBoundaries)
+{
+    EXPECT_EQ(0, isValidJourneyDate("32:01:2026"));
+    EXPECT_EQ(0, isValidJourneyDate("31:06:2026"));
+    EXPECT_EQ(0, isValidJourneyDate("00:01:2026"));
+    EXPECT_EQ(0, isValidJourneyDate("01:00:2026"));
+}
+
+TEST(JourneyDateTest, AcceptsEarliestSupportedYear)
+{
+    EXPECT_EQ(1, isValidJourneyDate("01:01:1900"));
+}
+
+
+TEST(UtilsNavigationTest, RepeatedPromptReturnsToActiveMenu)
+{
+    jmp_buf env;
+    railway_set_navigation_target(&env);
+
+    if (setjmp(env) == 0) {
+        char buffer[32] = {};
+
+        // Empty input is retried by getStringInput.
+        // Four calls with the same prompt trigger navigation.
+        StdinRedirect input("\n\n\n\n");
+
+        getStringInput("Repeated test prompt: ", buffer, sizeof(buffer));
+
+        FAIL() << "Expected navigation after repeated prompts";
+    }
+
+    railway_set_navigation_target(nullptr);
+}
+
+TEST(UtilsNavigationTest, RepeatedPromptReturnsToActiveMenu)
+{
+    // Prepare stdin before establishing the jump target.
+    StdinRedirect input("\n\n\n\n");
+    jmp_buf env;
+
+    railway_set_navigation_target(&env);
+
+    if (setjmp(env) == 0) {
+        char buffer[32] = {};
+        getStringInput("Repeated test prompt: ", buffer, sizeof(buffer));
+        railway_set_navigation_target(nullptr);
+        FAIL() << "Expected navigation after repeated prompts";
+    }
+
+    railway_set_navigation_target(nullptr);
+}
+
+
+
+TEST(UtilsNavigationTest, RepeatedPromptTriggersNavigation)
+{
+    // Construct the redirect before setjmp so longjmp doesn't skip
+    // destruction of the StdinRedirect object.
+    StdinRedirect input("\n\n\n\n");
+    jmp_buf env;
+
+    railway_set_navigation_target(&env);
+
+    if (setjmp(env) == 0) {
+        char buffer[32] = {};
+        getStringInput("Repeated navigation prompt: ",
+                       buffer, sizeof(buffer));
+
+        railway_set_navigation_target(nullptr);
+        FAIL() << "Expected navigation after repeated prompts";
+    }
+
+    railway_set_navigation_target(nullptr);
+}
+
+TEST(FloatInputTest, RetriesAfterReadFailure)
+{
+    // An overlong line causes readLine() to fail without reaching EOF.
+    StdinRedirect input(std::string(140, 'x') + "\n12.5\n");
+
+    EXPECT_FLOAT_EQ(12.5f, getFloatInput("Amount: "));
+}
+
+TEST(FloatInputTest, RejectsOverflowAndUnderflow)
+{
+    StdinRedirect input("1e9999\n1e-9999\n42.5\n");
+
+    EXPECT_FLOAT_EQ(42.5f, getFloatInput("Amount: "));
+}
+
+
+
+

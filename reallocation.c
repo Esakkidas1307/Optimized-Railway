@@ -13,7 +13,7 @@ static Booking *oldestQueuedBooking(int trainNo, const char *date,
     return chosen;
 }
 
-int reallocateAfterCancellation(Booking *booking, Availability *inventory,
+int reallocateAfterCancellation(Booking *booking, Availability *const inventory,
                                 int maxSeats, int maxRac, ReallocationResult *r)
 {
     if (!booking || !inventory || !r) return 0;

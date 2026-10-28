@@ -11,9 +11,9 @@ typedef struct {
     Booking *promotedToRAC;
     int promotedToCNFOldStatus;
 } ReallocationResult;
-int reallocateAfterCancellation(Booking *booking, Availability *inventory,
+int reallocateAfterCancellation(Booking *booking, Availability *const inventory,
                                 int maxSeats, int maxRac, ReallocationResult *r);
-void rollbackReallocation(Booking *booking, Availability *inventory, const ReallocationResult *r);
+void rollbackReallocation(Booking *booking, Availability *const inventory, const ReallocationResult *r);
 
 
 #endif

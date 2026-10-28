@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
+#include <algorithm>
+#include <iterator>
 #include <vector>
 
 /*
@@ -56,10 +58,11 @@ void copyText(char *destination, size_t size, const char *source)
 
 void resetTestState()
 {
-    std::memset(&booking, 0, sizeof booking);
-    std::memset(&queuedBooking, 0, sizeof queuedBooking);
-    std::memset(&inventory, 0, sizeof inventory);
-    std::memset(&train, 0, sizeof train);
+
+    booking = {};
+    queuedBooking = {};
+    inventory = {};
+    train = {};
 
     bookingHead = &booking;
 
@@ -115,9 +118,14 @@ void setInputs(std::initializer_list<const char *> inputs)
 {
     stringInputs.clear();
 
-    for (const char *input : inputs)
-        stringInputs.emplace_back(input);
-
+    std::transform(
+    inputs.begin(),
+    inputs.end(),
+    std::back_inserter(stringInputs),
+    [](const char *input) {
+        return std::string(input);
+    }
+);
     nextStringInput = 0;
 }
 
@@ -195,7 +203,7 @@ int saveAvailabilityData(void)
 }
 
 int reallocateAfterCancellation(Booking *booking,
-                                Availability *inventory,
+                                Availability *const inventory,
                                 int maxSeats,
                                 int maxRac,
                                 ReallocationResult *r)

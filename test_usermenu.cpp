@@ -234,3 +234,54 @@ TEST_F(UserMenuTest, MultipleChoicesAreHandledInSequence)
     EXPECT_EQ(unreservedBookingCalls, 0);
     EXPECT_EQ(cancelTicketCalls, 0);
 }
+
+
+TEST_F(UserMenuTest, ThreeInvalidChoicesReturnToMainMenu)
+{
+    menuChoices = {9, -1, 10};
+
+    EXPECT_NO_THROW(userMenu(111));
+
+    EXPECT_EQ(choiceIndex, 3U);
+    EXPECT_EQ(createProfileCalls, 0);
+    EXPECT_EQ(viewProfileCalls, 0);
+    EXPECT_EQ(updateProfileCalls, 0);
+    EXPECT_EQ(availabilityCalls, 0);
+    EXPECT_EQ(reservedBookingCalls, 0);
+    EXPECT_EQ(unreservedBookingCalls, 0);
+    EXPECT_EQ(viewBookingsCalls, 0);
+    EXPECT_EQ(cancelTicketCalls, 0);
+}
+
+TEST_F(UserMenuTest, ValidChoiceResetsInvalidChoiceCounter)
+{
+    menuChoices = {9, 1, 10, 2, 0};
+
+    userMenu(112);
+
+    EXPECT_EQ(choiceIndex, 5U);
+    EXPECT_EQ(createProfileCalls, 1);
+    EXPECT_EQ(viewProfileCalls, 1);
+}
+
+TEST_F(UserMenuTest, NegativeChoiceIsRejected)
+{
+    menuChoices = {-1, 0};
+
+    userMenu(113);
+
+    EXPECT_EQ(choiceIndex, 2U);
+    EXPECT_EQ(createProfileCalls, 0);
+    EXPECT_EQ(cancelTicketCalls, 0);
+}
+
+TEST_F(UserMenuTest, InvalidChoicesAfterValidChoiceReachLimit)
+{
+    menuChoices = {1, 9, 9, 9};
+
+    userMenu(114);
+
+    EXPECT_EQ(choiceIndex, 4U);
+    EXPECT_EQ(createProfileCalls, 1);
+    EXPECT_EQ(viewProfileCalls, 0);
+}

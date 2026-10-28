@@ -169,7 +169,7 @@ static int scheduleExists(int trainNumber, const char *journeyDate)
     (void)strncpy(key.journeyDate, journeyDate, sizeof(key.journeyDate) - 1U);
     position = railway_pointer_index_lower_bound(&scheduleIndex, &key, compareSchedulePointers);
     while (position < scheduleIndex.count) {
-        TrainSchedule *current = (TrainSchedule *)scheduleIndex.items[position];
+        const TrainSchedule *current = (const TrainSchedule *)scheduleIndex.items[position];
         if (current->trainNumber != trainNumber) break;
         if (strcmp(current->journeyDate, journeyDate) == 0) return SUCCESS;
         ++position;
@@ -332,7 +332,7 @@ int saveTrainScheduleData(void)
         return FAILURE;
     }
     for (position = 0U; position < scheduleIndex.count; ++position) {
-        TrainSchedule *current = (TrainSchedule *)scheduleIndex.items[position];
+        const TrainSchedule *current = (const TrainSchedule *)scheduleIndex.items[position];
         if (fprintf(fp, "SCHEDULE_START\n%d\n%s\n%d\n%d\nSCHEDULE_END\n",
                     current->trainNumber, current->journeyDate,
                     current->status, current->delayMinutes) < 0) {
