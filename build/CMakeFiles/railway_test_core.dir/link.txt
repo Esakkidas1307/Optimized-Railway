@@ -1,0 +1,2 @@
+/usr/bin/ar qc librailway_test_core.a CMakeFiles/railway_test_core.dir/utils.c.o CMakeFiles/railway_test_core.dir/date_time.c.o CMakeFiles/railway_test_core.dir/refund.c.o CMakeFiles/railway_test_core.dir/availability.c.o CMakeFiles/railway_test_core.dir/train.c.o CMakeFiles/railway_test_core.dir/train_search.c.o CMakeFiles/railway_test_core.dir/trainschedule.c.o CMakeFiles/railway_test_core.dir/reallocation.c.o CMakeFiles/railway_test_core.dir/optimization_runtime.c.o CMakeFiles/railway_test_core.dir/optimization_support.c.o
+/usr/bin/ranlib librailway_test_core.a

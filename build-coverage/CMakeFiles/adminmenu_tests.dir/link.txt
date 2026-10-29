@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/adminmenu_tests.dir/adminmenu.c.o CMakeFiles/adminmenu_tests.dir/test_adminmenu.cpp.o CMakeFiles/adminmenu_tests.dir/adminmenu_test_support.c.o -o adminmenu_tests  lib/libgtest_main.a lib/libgtest.a 

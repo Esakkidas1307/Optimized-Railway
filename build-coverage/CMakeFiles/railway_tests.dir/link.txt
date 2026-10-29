@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/railway_tests.dir/test_utils.cpp.o CMakeFiles/railway_tests.dir/test_refund.cpp.o CMakeFiles/railway_tests.dir/test_availability.cpp.o -o railway_tests  librailway_test_core.a lib/libgtest_main.a lib/libgtest.a 

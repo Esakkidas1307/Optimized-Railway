@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdio>
+#include <sys/stat.h>
 #include <stdexcept>
 #include <cstdlib>
 #include <cstring>
@@ -841,4 +842,117 @@ TEST_F(ReservedBookingTest, SaveFailsWhenBookingFileIsDirectory)
     EXPECT_EQ(saveBookingData(), FAILURE);
 
     ASSERT_EQ(std::system("rmdir bookings.txt"), 0);
+}
+
+TEST(BookingFlow, InventorySaveFailureRestoresSeatAndCancelsBooking) {
+    addBookingTestData(1, 0, 0, 5);
+
+    std::remove("running.txt");
+    std::remove("running.txt.tmp");
+    ASSERT_EQ(mkdir("running.txt", 0700), 0);
+
+    {
+        BookingInput input(
+            "Chennai\n"
+            "Bengaluru\n"
+            "25:12:2026\n"
+            "12345\n"
+            "SL\n"
+            "700\n"
+        );
+
+        int seatsBefore = availabilityHead->availableSeats;
+        bookTicket(101);
+
+        EXPECT_EQ(availabilityHead->availableSeats, seatsBefore);
+        EXPECT_EQ(bookingHead, nullptr);
+    }
+
+    ASSERT_EQ(rmdir("running.txt"), 0);
+    std::remove("running.txt.tmp");
+}
+TEST(BookingFlow, BookingRecordSaveFailureRestoresInventory) {
+    addBookingTestData(1, 0, 0, 5);
+
+    std::remove("bookings.txt");
+    std::remove("bookings.txt.tmp");
+    std::remove("running.txt");
+    std::remove("running.txt.tmp");
+
+    ASSERT_EQ(mkdir("bookings.txt", 0700), 0);
+
+    int seatsBefore = availabilityHead->availableSeats;
+
+    {
+        BookingInput input(
+            "Chennai\n"
+            "Bengaluru\n"
+            "25:12:2026\n"
+            "12345\n"
+            "SL\n"
+            "700\n"
+        );
+
+        bookTicket(101);
+
+        EXPECT_EQ(bookingHead, nullptr);
+        EXPECT_EQ(availabilityHead->availableSeats, seatsBefore);
+    }
+
+    ASSERT_EQ(rmdir("bookings.txt"), 0);
+    std::remove("bookings.txt.tmp");
+    std::remove("running.txt");
+    std::remove("running.txt.tmp");
+}
+
+TEST(BookingFlow, DisplaysTrainWithoutInventory) {
+    addBookingTestData(1, 0, 0, 5);
+
+    // Remove the matching availability record.
+    Availability* av = availabilityHead;
+    availabilityHead = nullptr;
+    while (av) {
+        Availability* next = av->next;
+        free(av);
+        av = next;
+    }
+
+    BookingInput input(
+        "Chennai\n"
+        "Bengaluru\n"
+        "25:12:2026\n"
+        "0\n"
+    );
+
+    bookTicket(101);
+
+    EXPECT_EQ(bookingHead, nullptr);
+}
+
+TEST(BookingFlow, UnknownSourceStationDoesNotCreateBooking) {
+    addBookingTestData(1, 0, 0, 5);
+
+    BookingInput input(
+        "UnknownStation\n"
+        "Bengaluru\n"
+        "25:12:2026\n"
+    );
+
+    bookTicket(101);
+
+    EXPECT_EQ(bookingHead, nullptr);
+}
+
+TEST(BookingFlow, UnknownDestinationStationDoesNotCreateBooking) {
+    addBookingTestData(1, 0, 0, 5);
+
+    BookingInput input(
+        "Chennai\n"
+        "UnknownStation\n"
+        "25:12:2026\n"
+    );
+
+    bookTicket(101);
+
+    EXPECT_EQ(bookingHead, nullptr);
 }

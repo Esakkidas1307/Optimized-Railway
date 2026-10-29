@@ -1,0 +1,1 @@
+/usr/bin/cc --coverage -O0 -g CMakeFiles/optimization_index_tests.dir/optimization_index_test.c.o CMakeFiles/optimization_index_tests.dir/optimization_support.c.o -o optimization_index_tests 

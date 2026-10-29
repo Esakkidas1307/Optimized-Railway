@@ -544,3 +544,100 @@ target_sources(passenger_test_module PRIVATE optimization_runtime.c optimization
 target_link_libraries(passenger_tests PRIVATE Threads::Threads)
 target_sources(main_tests PRIVATE optimization_runtime.c)
 target_link_libraries(main_tests PRIVATE Threads::Threads)
+
+# --------------------------------------------------
+# Threaded train search tests
+# --------------------------------------------------
+add_executable(train_search_tests
+    test_train_search.cpp
+)
+
+target_include_directories(train_search_tests PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(train_search_tests PRIVATE
+    railway_test_core
+    GTest::gtest_main
+    Threads::Threads
+)
+
+set_target_properties(train_search_tests PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(train_search_tests PRIVATE
+        --coverage -O0 -g
+    )
+    target_link_options(train_search_tests PRIVATE
+        --coverage
+    )
+endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(train_search_tests PRIVATE
+        --coverage -O0 -g
+    )
+    target_link_options(train_search_tests PRIVATE
+        --coverage
+    )
+endif()
+
+gtest_discover_tests(train_search_tests)
+
+add_executable(unreserved_booking_tests
+test_unreserved_booking.cpp
+unreserved_booking.c
+reserved_booking.c
+)
+
+target_include_directories(unreserved_booking_tests PRIVATE
+${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(unreserved_booking_tests PRIVATE
+railway_test_core
+GTest::gtest_main
+Threads::Threads
+)
+
+target_compile_options(unreserved_booking_tests PRIVATE
+--coverage
+-O0
+-g
+)
+
+target_link_options(unreserved_booking_tests PRIVATE
+--coverage
+)
+
+gtest_discover_tests(unreserved_booking_tests)
+
+add_executable(user_tests
+test_user.cpp
+user.c
+)
+
+target_include_directories(user_tests PRIVATE
+${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(user_tests PRIVATE
+railway_test_core
+GTest::gtest_main
+Threads::Threads
+)
+
+target_compile_options(user_tests PRIVATE
+--coverage
+-O0
+-g
+)
+
+target_link_options(user_tests PRIVATE
+--coverage
+)
+
+gtest_discover_tests(user_tests)

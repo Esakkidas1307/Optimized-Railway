@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/cancellation_tests.dir/cancellation.c.o CMakeFiles/cancellation_tests.dir/test_cancellation.cpp.o -o cancellation_tests  lib/libgtest_main.a lib/libgtest.a 

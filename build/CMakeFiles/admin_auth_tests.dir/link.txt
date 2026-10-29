@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage CMakeFiles/admin_auth_tests.dir/admin_auth.c.o CMakeFiles/admin_auth_tests.dir/date_time.c.o CMakeFiles/admin_auth_tests.dir/admin_auth_test_support.c.o CMakeFiles/admin_auth_tests.dir/test_admin_auth.cpp.o -o admin_auth_tests  lib/libgtest_main.a lib/libgtest.a 

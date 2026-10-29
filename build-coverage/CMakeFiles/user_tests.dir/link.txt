@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/user_tests.dir/test_user.cpp.o CMakeFiles/user_tests.dir/user.c.o -o user_tests  librailway_test_core.a lib/libgtest_main.a lib/libgtest.a 

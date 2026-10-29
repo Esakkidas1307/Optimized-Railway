@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage CMakeFiles/reserved_booking_tests.dir/test_reserved_booking.cpp.o CMakeFiles/reserved_booking_tests.dir/reserved_booking.c.o CMakeFiles/reserved_booking_tests.dir/passenger.c.o -o reserved_booking_tests  lib/libgtest_main.a librailway_test_core.a lib/libgtest.a 

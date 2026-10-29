@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/trainschedule_tests.dir/test_trainschedule.cpp.o -o trainschedule_tests  librailway_test_core.a lib/libgtest_main.a lib/libgtest.a 

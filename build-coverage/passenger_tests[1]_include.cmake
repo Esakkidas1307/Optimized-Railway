@@ -1,0 +1,5 @@
+if(EXISTS "/workspaces/Optimized-Railway/build-coverage/passenger_tests[1]_tests.cmake")
+  include("/workspaces/Optimized-Railway/build-coverage/passenger_tests[1]_tests.cmake")
+else()
+  add_test(passenger_tests_NOT_BUILT passenger_tests_NOT_BUILT)
+endif()

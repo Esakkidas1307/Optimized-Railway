@@ -1,0 +1,5 @@
+if(EXISTS "/workspaces/Optimized-Railway/build/usermenu_tests[1]_tests.cmake")
+  include("/workspaces/Optimized-Railway/build/usermenu_tests[1]_tests.cmake")
+else()
+  add_test(usermenu_tests_NOT_BUILT usermenu_tests_NOT_BUILT)
+endif()

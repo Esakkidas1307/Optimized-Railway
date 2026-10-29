@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/train_search_tests.dir/test_train_search.cpp.o -o train_search_tests  librailway_test_core.a lib/libgtest_main.a lib/libgtest.a 

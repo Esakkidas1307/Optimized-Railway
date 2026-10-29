@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/passenger_tests.dir/test_passenger.cpp.o CMakeFiles/passenger_test_module.dir/passenger.c.o CMakeFiles/passenger_test_module.dir/optimization_runtime.c.o CMakeFiles/passenger_test_module.dir/optimization_support.c.o -o passenger_tests  lib/libgtest_main.a lib/libgtest.a 

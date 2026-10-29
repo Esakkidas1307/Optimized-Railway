@@ -1,0 +1,1 @@
+/usr/bin/cc --coverage -O0 -g CMakeFiles/optimization_benchmark.dir/optimization_benchmark.c.o CMakeFiles/optimization_benchmark.dir/optimization_support.c.o -o optimization_benchmark 

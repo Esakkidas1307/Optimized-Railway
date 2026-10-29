@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/main_tests.dir/test_main.cpp.o CMakeFiles/main_tests.dir/main_test_support.c.o CMakeFiles/main_tests.dir/optimization_runtime.c.o CMakeFiles/main_test_entry.dir/main.c.o -o main_tests  lib/libgtest_main.a lib/libgtest.a 

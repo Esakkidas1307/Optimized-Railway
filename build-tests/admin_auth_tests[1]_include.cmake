@@ -1,0 +1,5 @@
+if(EXISTS "/workspaces/Optimized-Railway/build-tests/admin_auth_tests[1]_tests.cmake")
+  include("/workspaces/Optimized-Railway/build-tests/admin_auth_tests[1]_tests.cmake")
+else()
+  add_test(admin_auth_tests_NOT_BUILT admin_auth_tests_NOT_BUILT)
+endif()

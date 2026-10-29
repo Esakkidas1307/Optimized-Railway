@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g --coverage CMakeFiles/usermenu_tests.dir/usermenu.c.o CMakeFiles/usermenu_tests.dir/date_time.c.o CMakeFiles/usermenu_tests.dir/usermenu_test_support.c.o CMakeFiles/usermenu_tests.dir/test_usermenu.cpp.o -o usermenu_tests  lib/libgtest_main.a lib/libgtest.a 

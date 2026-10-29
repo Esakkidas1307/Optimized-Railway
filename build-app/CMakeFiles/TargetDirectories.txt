@@ -1,0 +1,6 @@
+/workspaces/Optimized-Railway/build-app/CMakeFiles/optimization_index_tests.dir
+/workspaces/Optimized-Railway/build-app/CMakeFiles/optimization_benchmark.dir
+/workspaces/Optimized-Railway/build-app/CMakeFiles/railway_app.dir
+/workspaces/Optimized-Railway/build-app/CMakeFiles/test.dir
+/workspaces/Optimized-Railway/build-app/CMakeFiles/edit_cache.dir
+/workspaces/Optimized-Railway/build-app/CMakeFiles/rebuild_cache.dir

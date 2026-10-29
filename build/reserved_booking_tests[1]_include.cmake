@@ -1,0 +1,5 @@
+if(EXISTS "/workspaces/Optimized-Railway/build/reserved_booking_tests[1]_tests.cmake")
+  include("/workspaces/Optimized-Railway/build/reserved_booking_tests[1]_tests.cmake")
+else()
+  add_test(reserved_booking_tests_NOT_BUILT reserved_booking_tests_NOT_BUILT)
+endif()

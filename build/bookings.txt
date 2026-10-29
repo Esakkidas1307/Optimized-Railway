@@ -1,0 +1,20 @@
+BOOKING_START
+PNR6ae261e601
+101
+Test Passenger
+25
+Male
+12345
+Test Express
+Chennai
+Bengaluru
+25:12:2026
+350
+SL
+700.00
+1
+RESERVED
+1
+0
+29:10:2026 02:28:14
+BOOKING_END
